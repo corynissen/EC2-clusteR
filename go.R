@@ -1,4 +1,7 @@
 
+library(RCurl)
+library(XML)
+
 ##### this is the script that runs everything
 
 # this is the function that will be processing items from the queue
@@ -27,6 +30,9 @@ aws.zone <- "aws availability zone here"
 max.nodes <- "maximum number of nodes to use"
 allowable.time <- "max allowable time between tasks for a machine"
 
+# these have private info, will strip out and move to main area soon
+path.to.ec2.shell.scripts <- "~/cn/personal/030413_amazon_controller/Joe_SQS_scripts"
+
 start.ec2.machine <- function(aws.access.key=aws.access.key, aws.secret.key,
                               ami=ami, aws.zone=aws.zone){
   #start machine
@@ -39,8 +45,22 @@ stop.ec2.machine <- function(aws.access.key=aws.access.key, aws.secret.key,
   return("success or not")
 }
 
-read.task.from.queue <- function(queue){
-  return(taskid)
+read.task.from.queue <- function(){
+  task.http <- system(paste0("bash ", path.to.ec2.shell.scripts, "/SQSget.sh "),
+                      intern=T)
+  response <- getURL(task.http)
+  response.list <- xmlToList(xmlParse(response))
+  message.body <- response.list$ReceiveMessageResult$Message$Body
+  return(message.body)
+}
+
+task.json <- '{messageID:3,message:"test from R"}'
+write.task.to.queue <- function(task.json){
+  task.http <- system(paste0("bash ", path.to.ec2.shell.scripts, "/SQSput.sh ",
+                             task.json), intern=T)
+  response <- getURL(task.http)
+  messageid <- xmlToDataFrame(response)$MessageId[1]
+  return(messageid)
 }
 
 write.task.complete.to.queue <- function(queue, taskid){
