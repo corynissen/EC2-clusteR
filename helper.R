@@ -2,18 +2,28 @@
 # this script contains helper functions used by both the controller and
 # the worker nodes / scripts
 
-start.ec2.machine <- function(aws.access.key=aws.access.key, aws.secret.key,
-                              ami=ami, aws.zone=aws.zone){
-  #start machine
-  return("id of machine")
-}
+start.ec2.machine <- function(ami.id,
+                              ec2.instance.type, aws.availability.zone,
+                              user.data.file="", path.to.ec2.shell.scripts){
+  run.string <- paste0("cd ", path.to.ec2.shell.scripts,
+                            " && ./aws run-instances --simple ", ami.id,
+                            " -instance-type ", ec2.instance.type,
+                            " -availability-zone ", aws.availability.zone)
+  if(user.data.file != ""){
+    run.string <- paste0(run.string, " -user.data.file ", user.data.file)
+  }
+  response <- system(run.string, intern=T)
+  response.list <- strsplit(response, "\t")[[1]]
+  instance.id <- response.list[1]
+  return(instance.id)
+} # start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
 
-stop.ec2.machine <- function(aws.access.key=aws.access.key, aws.secret.key,
-                             machine.id=machine.id){
-  #stop machine
+instance.id <- "i-e487bc97"
+stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
+  response <- system(paste0("cd ", path.to.ec2.shell.scripts,
+                            " && ./aws terminate-instances --xml ", instance.id), intern=T)
   return("success or not")
 }
-
 read.task.from.queue <- function(path.to.ec2.shell.scripts,
                                  aws.account=aws.account, queue=queue){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
