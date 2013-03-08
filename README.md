@@ -9,5 +9,5 @@ aws package uses perl
 boto (python package) needed for dynamodb communication  
 aws keys stored in /etc/boto.cfg for boto package  
 aws keys stored in ~/.awssecret for aws package  
-aws account number stored in config/config_local.R for your project.  
+aws account number stored in ~/.awsaccount    
   
