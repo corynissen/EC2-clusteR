@@ -22,7 +22,8 @@ aws.availability.zone <- "us-east-1c"
 ec2.instance.type <- "t1.micro"
 
 # path to startup script for an EC2 instance
-user.data.file <- "config/user_data_file_default.sh"
+user.data.file <- ifelse(file.exists("config/user_data_file_local.sh"),
+       "config/user_data_file_local.sh", "config/user_data_file_default.sh")
 
 # maximum number of worker nodes to use
 max.nodes <- 3
