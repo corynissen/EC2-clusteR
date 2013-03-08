@@ -1,6 +1,11 @@
 
 # this script will manage the starting / stopping of worker nodes.
 
+# if local file exists, source it, otherwise source the default one.
+config_file <- ifelse((file.exists("config/config_local.R")),
+                      "config/config_local.R", "config/config_default.R")
+source(config_file)
+
 # this is the function that will be processing items from the queue
 # it must be able to read from the queue to get a task, do the task,
 # and write back to the queue indicating the task is done
