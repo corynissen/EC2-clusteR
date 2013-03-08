@@ -2,8 +2,7 @@
 # this script contains helper functions used by both the controller and
 # the worker nodes / scripts
 
-start.ec2.machine <- function(ami.id,
-                              ec2.instance.type, aws.availability.zone,
+start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
                               user.data.file="", path.to.ec2.shell.scripts){
   run.string <- paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws run-instances --simple ", ami.id,
@@ -16,14 +15,16 @@ start.ec2.machine <- function(ami.id,
   response.list <- strsplit(response, "\t")[[1]]
   instance.id <- response.list[1]
   return(instance.id)
-} # start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
+} # instance.id <- start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
 
-instance.id <- "i-e487bc97"
+instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws terminate-instances --xml ", instance.id), intern=T)
-  return("success or not")
-}
+  ret.val <- ifelse(sum(grepl("Error", response))>0, response, "success")
+  return(ret.val)
+} # response <- stop.ec2.machine(instance.id=instance.id, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
+ 
 read.task.from.queue <- function(path.to.ec2.shell.scripts,
                                  aws.account=aws.account, queue=queue){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
