@@ -7,7 +7,7 @@
 queue <- "queue_name_here"
 
 # aws account number
-aws.account <- "aws_acct_number"
+aws.account <- scan("~/.awsaccount", quiet=T)
 
 # pick your favorite linux (ubuntu probably would work best) with R installed
 # bioconductor ami http://bioconductor.org/help/bioconductor-cloud-ami/#ami_ids
