@@ -21,9 +21,10 @@ instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws terminate-instances --xml ", instance.id), intern=T)
+  response <- paste0(response, collapse="")
   ret.val <- ifelse(sum(grepl("Error", response))>0, response, "success")
   return(ret.val)
-} # response <- stop.ec2.machine(instance.id=instance.id, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
+} # stop.ec2.machine(instance.id=instance.id, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
  
 read.task.from.queue <- function(path.to.ec2.shell.scripts,
                                  aws.account=aws.account, queue=queue){
