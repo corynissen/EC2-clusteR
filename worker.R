@@ -5,6 +5,7 @@
 config_file <- ifelse((file.exists("config/config_local.R")),
                       "config/config_local.R", "config/config_default.R")
 source(config_file)
+source("helper.R")
 
 count.smileys <- function(text){
   if(mode(text)!="character"){
