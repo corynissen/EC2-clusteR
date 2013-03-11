@@ -1,10 +1,10 @@
+#!/bin/bash
+
 #########################################
 ######## DO NOT CHECK INTO GIT ##########
 #########################################
 
 #This script executes on a classification machine upon boot.
-
-#!/bin/bash
 
 # aws keys
 aws_access_key_id=your_id_here
@@ -12,7 +12,7 @@ aws_secret_access_key=your_key_here
 aws_account=your_aws_account
 
 # install git
-sudo apt-get install git
+apt-get install git
 
 # install pip
 apt-get install python-pip python-dev build-essential
@@ -23,9 +23,9 @@ pip install --upgrade virtualenv
 pip install -U boto
 
 # aws keys for aws package
-echo $aws_access_key_id >> ~/.awssecret
-echo $aws_secret_access_key >> ~/.awssecret
-chmod 600 ~/.awssecret
+echo $aws_access_key_id >> /home/ubuntu/.awssecret
+echo $aws_secret_access_key >> /home/ubuntu/.awssecret
+chmod 600 /home/ubuntu/.awssecret
 
 # aws keys for boto package
 echo [Credentials] >> /etc/boto.cfg
@@ -34,8 +34,8 @@ echo aws_secret_access_key = $aws_secret_access_key >> /etc/boto.cfg
 chmod 600 /etc/boto.cfg
 
 # aws account for this package
-echo $aws_account >> ~/.awsaccount
-chmod 600 ~/.awsaccount
+echo $aws_account >> /home/ubuntu/.awsaccount
+chmod 600 /home/ubuntu/.awsaccount
 
 # get this package from github
 mkdir /src
