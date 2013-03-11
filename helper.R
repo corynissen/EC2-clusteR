@@ -4,8 +4,8 @@
 
 start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
                               user.data.file="", path.to.ec2.shell.scripts){
-  run.string <- paste0("cd ", path.to.ec2.shell.scripts,
-                            " && ./aws run-instances --simple ", ami.id,
+  run.string <- paste0("./", path.to.ec2.shell.scripts,
+                            "/aws run-instances --simple ", ami.id,
                             " -instance-type ", ec2.instance.type,
                             " -availability-zone ", aws.availability.zone)
   if(user.data.file != ""){
@@ -17,7 +17,7 @@ start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
   return(instance.id)
 } # instance.id <- start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
 
-instance.id <- "i-e487bc9"
+#instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws terminate-instances --xml ", instance.id), intern=T)
@@ -46,18 +46,18 @@ get.instance.id <- function(){
   return(instance.id)
 }
 
-message.json <- '{messageID:3,message:"test from R"}'
+#message.json <- '{"messageID":3,"message":"test from R"}'
 write.message.to.queue <- function(message.json, path.to.ec2.shell.scripts,
                                 aws.account=aws.account, queue=queue){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws send-message /", aws.account, "/", queue,
-                             " --simple -message ",message.json), intern=T)
+                             " --simple -message ", message.json), intern=T)
   messageid <- substring(response, regexpr("\t", response)[1]+1, nchar(response))
   return(messageid)
 } # write.message.to.queue(message.json, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
 
-read.message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
-receipt.handle <- read.message.list$receipt.handle
+#read.message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
+#receipt.handle <- read.message.list$receipt.handle
 delete.message.from.queue <- function(receipt.handle){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws delete-message /", aws.account, "/", queue,
