@@ -6,6 +6,12 @@
 # this is my test queue
 queue <- "queue_name_here"
 
+# dynamo log table name
+log.table.name <- "your_log_table_name"
+
+# dynamo output table name
+output.table.name <- "your_output_table_name"
+
 # aws account number
 aws.account <- scan("~/.awsaccount", quiet=T)
 
