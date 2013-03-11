@@ -7,12 +7,13 @@ library(RJSONIO)
 config_file <- ifelse((file.exists("config/config_local.R")),
                       "config/config_local.R", "config/config_default.R")
 source(config_file)
+source("helper.R")
 
 # this is the function that will be processing items from the queue
 # it must be able to read from the queue to get a task, do the task,
 # and write back to the queue indicating the task is done
 
-run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zone, path.to.ec2.shell.scripts, allowable.time, aws.account){
+run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zone, path.to.ec2.shell.scripts, allowable.time, aws.account, user.data.file){
   # start machines
   # change to apply-ish function after working
   ec2.machine.id.vec <- NULL
@@ -22,7 +23,9 @@ run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zo
                             start.ec2.machine(ami.id=ami.id,
                                  ec2.instance.type=ec2.instance.type,
                                  aws.availability.zone=aws.availability.zone,
-                                 path.to.ec2.shell.scripts=path.to.ec2.shell.scripts))
+                                 path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+                                 user.data.file=user.data.file, key=ec2.key,
+                                 group=ec2.security.group))
   }
 
   ### monitoring
@@ -51,7 +54,8 @@ run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zo
                                   start.ec2.machine(ami.id=ami.id,
                                   ec2.instance.type=ec2.instance.type,
                                   aws.availability.zone=aws.availability.zone,
-                                  path.to.ec2.shell.scripts=path.to.ec2.shell.scripts))
+                                  path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+                                  key=ec2.key))
           }
         }
       }
@@ -59,14 +63,15 @@ run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zo
   }
   # Shouldn't need this as they should all be stopped already...
   # stop machines
-#  for(machine in ec2.machine.id.vec){
-#    stop.ec2.machine(aws.access.key=aws.access.key, aws.secret.key,
-#                     machine.id=machine.id)
-#  }
+  for(machine in ec2.machine.id.vec){
+    stop.ec2.machine(instance.id=machine, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
+    ec2.machine.id.vec <- NULL
+  }
 }
 
 #run(queue=queue, max.nodes=max.nodes, ami.id=ami.id,
 #    ec2.instance.type=ec2.instance.type,
 #    aws.availability.zone=aws.availability.zone,
 #    path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
-#    allowable.time=allowable.time, aws.account=aws.account)
+#    allowable.time=allowable.time, aws.account=aws.account,
+#    user.data.file=user.data.file)
