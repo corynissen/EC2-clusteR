@@ -21,8 +21,8 @@ start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
 
 #instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
-  response <- system(paste0("cd ", path.to.ec2.shell.scripts,
-                            " && ./aws terminate-instances --xml ", instance.id), intern=T)
+  response <- system(paste0("./", path.to.ec2.shell.scripts,
+                            "/aws terminate-instances --xml ", instance.id), intern=T)
   response <- paste0(response, collapse="")
   ret.val <- ifelse(sum(grepl("Error", response))>0, response, "success")
   return(ret.val)
@@ -30,8 +30,8 @@ stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
  
 read.message.from.queue <- function(path.to.ec2.shell.scripts,
                                  aws.account=aws.account, queue=queue){
-  response <- system(paste0("cd ", path.to.ec2.shell.scripts,
-                            " && ./aws receive-message /", aws.account, "/", queue,
+  response <- system(paste0("./", path.to.ec2.shell.scripts,
+                            "/aws receive-message /", aws.account, "/", queue,
                              " --simple"), intern=T)
   response.list <- strsplit(response, "\t")[[1]]
   receipt.handle <- response.list[1]
@@ -51,8 +51,8 @@ get.instance.id <- function(){
 #message.json <- '{"messageID":3,"message":"test from R"}'
 write.message.to.queue <- function(message.json, path.to.ec2.shell.scripts,
                                 aws.account=aws.account, queue=queue){
-  response <- system(paste0("cd ", path.to.ec2.shell.scripts,
-                            " && ./aws send-message /", aws.account, "/", queue,
+  response <- system(paste0("./", path.to.ec2.shell.scripts,
+                            "/aws send-message /", aws.account, "/", queue,
                              " --simple -message ", message.json), intern=T)
   messageid <- substring(response, regexpr("\t", response)[1]+1, nchar(response))
   return(messageid)
@@ -61,8 +61,8 @@ write.message.to.queue <- function(message.json, path.to.ec2.shell.scripts,
 #read.message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
 #receipt.handle <- read.message.list$receipt.handle
 delete.message.from.queue <- function(receipt.handle){
-  response <- system(paste0("cd ", path.to.ec2.shell.scripts,
-                            " && ./aws delete-message /", aws.account, "/", queue,
+  response <- system(paste0("./", path.to.ec2.shell.scripts,
+                            "/aws delete-message /", aws.account, "/", queue,
                              " --simple --handle ",receipt.handle), intern=T)
   ret.val <- ifelse(sum(grepl("ReceiptHandleIsInvalid", response)) > 0, "ReceiptHandleIsInvalid", "success")
   return(ret.val)
@@ -71,8 +71,8 @@ delete.message.from.queue <- function(receipt.handle){
 get.queue.length <- function(path.to.ec2.shell.scripts,
                              aws.account=aws.account, queue=queue){
   # get the queue length and return it  
-  response <- system(paste0("cd ", path.to.ec2.shell.scripts,
-                            " && ./aws get-queue-attributes /", aws.account, "/", queue,
+  response <- system(paste0("./", path.to.ec2.shell.scripts,
+                            "/aws get-queue-attributes /", aws.account, "/", queue,
                              " --simple -attribute All"), intern=T)
   if(sum(grepl("ApproximateNumberOfMessages\t", response)) == 0){
     ret.val <- "error in getting queue length"
