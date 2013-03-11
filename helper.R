@@ -3,11 +3,13 @@
 # the worker nodes / scripts
 
 start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
-                              user.data.file="", path.to.ec2.shell.scripts){
+                              user.data.file="", path.to.ec2.shell.scripts,
+                              key, group){
   run.string <- paste0("./", path.to.ec2.shell.scripts,
                             "/aws run-instances --simple ", ami.id,
                             " -instance-type ", ec2.instance.type,
-                            " -availability-zone ", aws.availability.zone)
+                            " -availability-zone ", aws.availability.zone,
+                            " -key ", key, " -group ", group)
   if(user.data.file != ""){
     run.string <- paste0(run.string, " -user.data.file ", user.data.file)
   }
@@ -15,7 +17,7 @@ start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
   response.list <- strsplit(response, "\t")[[1]]
   instance.id <- response.list[1]
   return(instance.id)
-} # instance.id <- start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
+} # instance.id <- start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, key=ec2.key, group=ec2.security.group)
 
 #instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
