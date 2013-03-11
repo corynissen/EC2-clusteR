@@ -1,14 +1,52 @@
 
 # this file is the script that will run on the worker nodes
 
-some.function <- function(x){
-  # read task from queue
-  taskid <- read.task.from.queue(queue)
-  # do something with it
-  # write output somewhere...
-  # if success, write to queue
-  write.task.complete.to.queue(queue, taskid)
-  # if success, write time to dynamo
-  write.task.log.to.dynamo(aws.access.key=aws.access.key, aws.secret.key,
-                           machine.id=machine.id, sys.time=Sys.time(), taskid)
-}  
+# if local file exists, source it, otherwise source the default one.
+config_file <- ifelse((file.exists("config/config_local.R")),
+                      "config/config_local.R", "config/config_default.R")
+source(config_file)
+
+count.smileys <- function(text){
+  if(mode(text)!="character"){
+    ret <- "need character input"
+  }else{
+    reg <- gregexpr(":)", text)
+    count <- length(reg[reg!=-1])
+    ret <- count
+  }
+  return(ret)
+}
+
+instance.id <- get.instance.id()
+
+run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
+                output.table.name, instance.id){
+  while(TRUE){
+    # read task from queue, includes body, receipt.handle, messageid
+    message.list <- read.message.from.queue(queue)
+    text <- message.list$message.body
+    # do something with it
+    smiley.count <- count.smileys(text)
+    if(mode(smiley.count)=="numeric"){
+      # write output somewhere...
+      write.return <- write.output.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+                           table.name=output.table.name,
+                           instance.id=instance.id,
+                           message.body=message.list$message.body,
+                           output=smiley.count)
+      if(is.null(attr(write.return, "status"))){
+        # if success (null status), delete from queue
+        delete.message.from.queue(message.list$receipt.handle)
+        # if success, write time to dynamo
+        write.task.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+                                 table.name=log.table.name,
+                                 instance.id=instance.id,
+                                 message.list$messageid)
+      }
+    }
+  }
+}
+
+run(queue=queue, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+    log.table.name=log.table.name, output.table.name=output.table.name,
+    instance.id )
