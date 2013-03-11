@@ -48,6 +48,6 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
   }
 }
 
-run(queue=queue, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
-    log.table.name=log.table.name, output.table.name=output.table.name,
+run(queue, path.to.ec2.shell.scripts,
+    log.table.name, output.table.name,
     instance.id )
