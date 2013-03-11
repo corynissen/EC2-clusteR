@@ -26,7 +26,7 @@ stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
   return(ret.val)
 } # stop.ec2.machine(instance.id=instance.id, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts)
  
-read.task.from.queue <- function(path.to.ec2.shell.scripts,
+read.message.from.queue <- function(path.to.ec2.shell.scripts,
                                  aws.account=aws.account, queue=queue){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws receive-message /", aws.account, "/", queue,
@@ -37,20 +37,27 @@ read.task.from.queue <- function(path.to.ec2.shell.scripts,
   messageid <- response.list[3]
   ret.val <- list(message.body=message.body, receipt.handle=receipt.handle, messageid=messageid)
   return(ret.val)
-} # read.task.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
+} # read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
 
-task.json <- '{messageID:3,message:"test from R"}'
-write.task.to.queue <- function(task.json, path.to.ec2.shell.scripts,
+get.instance.id <- function(){
+  # this returns the instance id from within a running ec2 instance
+  instance.id <- system("wget -q -O - http://169.254.169.254/latest/meta-data/instance-id",
+                        intern=T)
+  return(instance.id)
+}
+
+message.json <- '{messageID:3,message:"test from R"}'
+write.message.to.queue <- function(message.json, path.to.ec2.shell.scripts,
                                 aws.account=aws.account, queue=queue){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws send-message /", aws.account, "/", queue,
-                             " --simple -message ",task.json), intern=T)
+                             " --simple -message ",message.json), intern=T)
   messageid <- substring(response, regexpr("\t", response)[1]+1, nchar(response))
   return(messageid)
-} # write.task.to.queue(task.json, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
+} # write.message.to.queue(message.json, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
 
-read.task.list <- read.task.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
-receipt.handle <- read.task.list$receipt.handle
+read.message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
+receipt.handle <- read.message.list$receipt.handle
 delete.message.from.queue <- function(receipt.handle){
   response <- system(paste0("cd ", path.to.ec2.shell.scripts,
                             " && ./aws delete-message /", aws.account, "/", queue,
@@ -75,23 +82,35 @@ get.queue.length <- function(path.to.ec2.shell.scripts,
   return(ret.val)
 } # get.queue.length(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
 
-write.task.log.to.dynamo <- function(path.to.ec2.shell.scripts, table.name, machine.id=machine.id, taskid){
-  # every time a task is successfully completed, log it in dynamodb with the
-  # machineid as the hash, the sys.time as the range, and taskid as data
+write.message.log.to.dynamo <- function(path.to.ec2.shell.scripts, table.name, instance.id, messageid){
+  # every time a message is successfully completed, log it in dynamodb with the
+  # instanceid as the hash, the sys.time as the range, and messageid as data
   time.pretty <- Sys.time()
   time.int <- round(unclass(time.pretty))
   ret.val <- system(paste0("python ", path.to.ec2.shell.scripts,
-                           "/write_to_dynamo.py \'", table.name, "\' \'", taskid,
-                           "\' \'", machine.id, "\' \'", time.pretty, "\' ", time.int),
+                           "/write_to_dynamo.py \'", table.name, "\' \'", messageid,
+                           "\' \'", instance.id, "\' \'", time.pretty, "\' ", time.int),
                     intern=T)
   return(ret.val)
-} # write.task.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_test", machine.id="machineid2", taskid="taskid1")
+} # write.message.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_test", instance.id="instanceid2", messageid="messageid1")
 
-read.task.log.from.dynamo <- function(path.to.ec2.shell.scripts, table.name, machine.id=machine.id){
+read.message.log.from.dynamo <- function(path.to.ec2.shell.scripts, table.name, instance.id){
   # read the most recent message for a given machine.id
   ret.val <- system(paste0("python ", path.to.ec2.shell.scripts,
                            "/read_from_dynamo.py \'", table.name,
-                           "\' \'", machine.id, "\'"),
+                           "\' \'", instance.id, "\'"),
                     intern=T)
   return(ret.val)
-} # read.task.log.from.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_test", machine.id="machineid2")
+} # read.message.log.from.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_test", instance.id="instanceid2")
+
+write.output.to.dynamo <- function(path.to.ec2.shell.scripts, table.name, instance.id, message.body, output){
+  # every time a message is successfully completed, log it in dynamodb with the
+  # instanceid as the hash, the sys.time as the range, and messageid as data
+  time.pretty <- Sys.time()
+  time.int <- round(unclass(time.pretty))
+  ret.val <- system(paste0("python ", path.to.ec2.shell.scripts,
+                           "/write_output_to_dynamo.py \'", table.name, "\' \'",
+                           message.body, "\' \'", output, "\' \'", instance.id,
+                           "\' \'", time.pretty, "\' ", time.int), intern=T)
+  return(ret.val)
+} # write.output.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_output_test", instance.id="instanceid2", message.body="{sample tweet here :)}", output="1")
