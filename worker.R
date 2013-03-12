@@ -26,7 +26,7 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
     # read task from queue, includes body, receipt.handle, messageid
     message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                                             aws.account=aws.account, queue=queue)
-    if(is.list(message.list){
+    if(is.list(message.list)){
       message.list$message.body <- gsub("!", "", message.list$message.body)
       message.list$message.body <- gsub("'", "", message.list$message.body)
       message.list$message.body <- gsub('"', "", message.list$message.body)
