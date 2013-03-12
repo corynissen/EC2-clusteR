@@ -40,7 +40,7 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
         # if success (null status), delete from queue
         delete.message.from.queue(message.list$receipt.handle,
                                   path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
-                                  aws.account=aws.account)
+                                  aws.account=aws.account, queue=queue)
         # if success, write time to dynamo
         write.task.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                                  table.name=log.table.name,
