@@ -18,7 +18,7 @@ count.smileys <- function(text){
   return(ret)
 }
 
-instance.id <- get.instance.id()
+my.instance.id <- get.instance.id()
 
 run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
                 output.table.name, instance.id, aws.account){
