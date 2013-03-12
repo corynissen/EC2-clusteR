@@ -42,7 +42,7 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
                                   path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                                   aws.account=aws.account, queue=queue)
         # if success, write time to dynamo
-        write.task.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+        write.message.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                                  table.name=log.table.name,
                                  instance.id=instance.id,
                                  message.list$messageid)
