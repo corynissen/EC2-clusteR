@@ -24,7 +24,8 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
                 output.table.name, instance.id){
   while(TRUE){
     # read task from queue, includes body, receipt.handle, messageid
-    message.list <- read.message.from.queue(queue)
+    message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+                                            aws.account=aws.account, queue=queue)
     text <- message.list$message.body
     # do something with it
     smiley.count <- count.smileys(text)
