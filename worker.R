@@ -32,6 +32,7 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
     smiley.count <- count.smileys(text)
     if(mode(smiley.count)=="numeric"){
       # write output somewhere...
+      print("writing output to dynamo")
       write.return <- write.output.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                            table.name=output.table.name,
                            instance.id=instance.id,
@@ -39,10 +40,12 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
                            output=smiley.count)
       if(is.null(attr(write.return, "status"))){
         # if success (null status), delete from queue
+        print("deleting message from queue")
         delete.message.from.queue(message.list$receipt.handle,
                                   path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                                   aws.account=aws.account, queue=queue)
         # if success, write time to dynamo
+        print("writing log to dynamo")
         write.message.log.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
                                  table.name=log.table.name,
                                  instance.id=instance.id,
