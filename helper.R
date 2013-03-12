@@ -60,13 +60,13 @@ write.message.to.queue <- function(message.json, path.to.ec2.shell.scripts,
 
 #read.message.list <- read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,aws.account=aws.account, queue=queue)
 #receipt.handle <- read.message.list$receipt.handle
-delete.message.from.queue <- function(receipt.handle){
+delete.message.from.queue <- function(receipt.handle, path.to.ec2.shell.scripts){
   response <- system(paste0("./", path.to.ec2.shell.scripts,
                             "/aws delete-message /", aws.account, "/", queue,
                              " --simple --handle ",receipt.handle), intern=T)
   ret.val <- ifelse(sum(grepl("ReceiptHandleIsInvalid", response)) > 0, "ReceiptHandleIsInvalid", "success")
   return(ret.val)
-} # delete.message.from.queue(receipt.handle)
+} # delete.message.from.queue(receipt.handle, path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts)
 
 get.queue.length <- function(path.to.ec2.shell.scripts,
                              aws.account=aws.account, queue=queue){
@@ -115,4 +115,4 @@ write.output.to.dynamo <- function(path.to.ec2.shell.scripts, table.name, instan
                            message.body, "\' \'", output, "\' \'", instance.id,
                            "\' \'", time.pretty, "\' ", time.int), intern=T)
   return(ret.val)
-} # write.output.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_output_test", instance.id="instanceid2", message.body="{sample tweet here :)}", output="1")
+} # write.output.to.dynamo(path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts,table.name="cory_output_test", instance.id="instanceid2", message.body="{sample tweet here :)}", output="1")
