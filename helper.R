@@ -33,11 +33,15 @@ read.message.from.queue <- function(path.to.ec2.shell.scripts,
   response <- system(paste0("./", path.to.ec2.shell.scripts,
                             "/aws receive-message /", aws.account, "/", queue,
                              " --simple"), intern=T)
-  response.list <- strsplit(response, "\t")[[1]]
-  receipt.handle <- response.list[1]
-  message.body <- response.list[2]
-  messageid <- response.list[3]
-  ret.val <- list(message.body=message.body, receipt.handle=receipt.handle, messageid=messageid)
+  if(length(response)==0){
+    ret.val <- "queue is probably empty"
+  }else{
+    response.list <- strsplit(response, "\t")[[1]]
+    receipt.handle <- response.list[1]
+    message.body <- response.list[2]
+    messageid <- response.list[3]
+    ret.val <- list(message.body=message.body, receipt.handle=receipt.handle, messageid=messageid)
+  }
   return(ret.val)
 } # read.message.from.queue(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
 
