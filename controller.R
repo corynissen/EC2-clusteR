@@ -13,7 +13,7 @@ source("helper.R")
 # it must be able to read from the queue to get a task, do the task,
 # and write back to the queue indicating the task is done
 
-run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zone, path.to.ec2.shell.scripts, allowable.time, aws.account, user.data.file){
+run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zone, path.to.ec2.shell.scripts, allowable.time, aws.account, user.data.file, ec2.key, ec2.security.group){
   # start machines
   # change to apply-ish function after working
   ec2.machine.id.vec <- NULL
@@ -27,7 +27,7 @@ run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zo
                                  user.data.file=user.data.file, key=ec2.key,
                                  group=ec2.security.group))
   }
-
+}
   ### monitoring
   # read the time of the most recently completed task for each machine
   # if the time difference from current time has been greater than
@@ -69,9 +69,10 @@ run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zo
   }
 }
 
-#run(queue=queue, max.nodes=max.nodes, ami.id=ami.id,
-#    ec2.instance.type=ec2.instance.type,
-#    aws.availability.zone=aws.availability.zone,
-#    path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
-#    allowable.time=allowable.time, aws.account=aws.account,
-#    user.data.file=user.data.file)
+run(queue=my.queue, max.nodes=my.max.nodes, ami.id=my.ami.id,
+    ec2.instance.type=my.ec2.instance.type,
+    aws.availability.zone=my.aws.availability.zone,
+    path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts,
+    allowable.time=my.allowable.time, aws.account=my.aws.account,
+    user.data.file=my.user.data.file, ec2.key=my.ec2.key,
+    ec2.security.group=my.ec2.security.group)
