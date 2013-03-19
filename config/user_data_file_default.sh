@@ -10,11 +10,6 @@ aws_account=your account number here
 # install git
 apt-get install git
 
-# install pip
-#apt-get install python-pip python-dev build-essential --assume-yes
-#pip install --upgrade pip 
-#pip install --upgrade virtualenv 
-
 # install python boto
 #pip install -U boto
 cd /root
