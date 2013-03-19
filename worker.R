@@ -1,10 +1,10 @@
 
 # this file is the script that will run on the worker nodes
 
-# if local file exists, source it, otherwise source the default one.
-config_file <- ifelse((file.exists("config/config_local.R")),
-                      "config/config_local.R", "config/config_default.R")
-source(config_file)
+# load the default file, then the local if it exists. The local one
+# will override some / all of the default parameters
+if(file.exists("config/config_default.R")){source("config_default.R")}
+if(file.exists("config/config_local.R")){source("config_local.R")}
 source("helper.R")
 
 count.smileys <- function(text){
