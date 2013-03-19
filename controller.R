@@ -5,10 +5,10 @@ if(class(a)=="try-error"){
   install.packages("RJSONIO", repos="http://cran.mtu.edu/")
 }
 
-# if local file exists, source it, otherwise source the default one.
-config_file <- ifelse((file.exists("config/config_local.R")),
-                      "config/config_local.R", "config/config_default.R")
-source(config_file)
+# load the default file, then the local if it exists. The local one
+# will override some / all of the default parameters
+if(file.exists("config/config_default.R")){source("config_default.R")}
+if(file.exists("config/config_local.R")){source("config_local.R")}
 source("helper.R")
 
 # this is the function that will be processing items from the queue
