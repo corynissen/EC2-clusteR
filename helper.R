@@ -19,6 +19,45 @@ start.ec2.machine <- function(ami.id, ec2.instance.type, aws.availability.zone,
   return(instance.id)
 } # instance.id <- start.ec2.machine(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, key=ec2.key, group=ec2.security.group)
 
+request.spot.instance <- function(ami.id, ec2.instance.type, aws.availability.zone,
+                              user.data.file="", path.to.ec2.shell.scripts,
+                              key, group, price.df){
+  price <- price.df$price[price.df$type==ec2.instance.type]
+  run.string <- paste0("./", path.to.ec2.shell.scripts,
+                            "/aws request-spot-instances --xml ", ami.id,
+                            " -instance-type ", ec2.instance.type,
+                            " -availability-zone ", aws.availability.zone,
+                            " -key ", key, " -group ", group, " -price ", price)
+  if(user.data.file != ""){
+    run.string <- paste0(run.string, " -user.data.file ", user.data.file)
+  }
+  response <- system(run.string, intern=T)
+  response <- paste(response, collapse="")
+  if(grepl("<spotInstanceRequestId>", response)){
+    spot.instance.request.id <- substring(response,
+       regexpr("<spotInstanceRequestId>", response)+23,
+       regexpr("</spotInstanceRequestId>", response)-1)
+    ret.val <- spot.instance.request.id
+  }else{
+    ret.val <- paste("error:  ", response)
+  }
+  return(ret.val)
+} # spot.instance.request.id <- request.spot.instance(ami.id=my.ami.id, ec2.instance.type=my.ec2.instance.type, aws.availability.zone=my.aws.availability.zone, path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts, key=my.ec2.key, group=my.ec2.security.group, price.df=my.price)
+
+cancel.spot.instance.request <- function(path.to.ec2.shell.scripts, spot.instance.request.id){
+  run.string <- paste0("./", path.to.ec2.shell.scripts,
+                       "/aws cancel-spot-instance-requests --xml ",
+                       spot.instance.request.id)
+  response <- system(run.string, intern=T)
+  response <- paste(response, collapse="")
+  if(grepl("<Errors>", response)){
+    ret.val <- paste("error:  ", response)
+  }else{
+    ret.val <- "success"
+  }
+  return(ret.val)
+} # cancel.spot.instance.request(path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts, spot.instance.request.id=spot.instance.request.id)
+
 #instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
   response <- system(paste0("./", path.to.ec2.shell.scripts,
