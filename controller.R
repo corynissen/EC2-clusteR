@@ -1,5 +1,6 @@
 
 # this script will manage the starting / stopping of worker nodes.
+
 a <- try(library(RJSONIO), silent=T)
 if(class(a)=="try-error"){
   install.packages("RJSONIO", repos="http://cran.mtu.edu/")
@@ -7,8 +8,8 @@ if(class(a)=="try-error"){
 
 # load the default file, then the local if it exists. The local one
 # will override some / all of the default parameters
-if(file.exists("config/config_default.R")){source("config_default.R")}
-if(file.exists("config/config_local.R")){source("config_local.R")}
+if(file.exists("config/config_default.R")){source("config/config_default.R")}
+if(file.exists("config/config_local.R")){source("config/config_local.R")}
 source("helper.R")
 
 # this is the function that will be processing items from the queue
@@ -103,10 +104,10 @@ run <- function(queue, max.nodes, ami.id, ec2.instance.type, aws.availability.zo
   }
 }
 
-run(queue=my.queue, max.nodes=my.max.nodes, ami.id=my.ami.id,
-    ec2.instance.type=my.ec2.instance.type,
-    aws.availability.zone=my.aws.availability.zone,
-    path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts,
-    allowable.time=my.allowable.time, aws.account=my.aws.account,
-    user.data.file=my.user.data.file, ec2.key=my.ec2.key,
-    ec2.security.group=my.ec2.security.group, log.table.name=my.log.table.name)
+run(queue=queue, max.nodes=max.nodes, ami.id=ami.id,
+    ec2.instance.type=ec2.instance.type,
+    aws.availability.zone=aws.availability.zone,
+    path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+    allowable.time=allowable.time, aws.account=aws.account,
+    user.data.file=user.data.file, ec2.key=ec2.key,
+    ec2.security.group=ec2.security.group, log.table.name=log.table.name)
