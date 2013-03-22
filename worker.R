@@ -3,8 +3,8 @@
 
 # load the default file, then the local if it exists. The local one
 # will override some / all of the default parameters
-if(file.exists("config/config_default.R")){source("config_default.R")}
-if(file.exists("config/config_local.R")){source("config_local.R")}
+if(file.exists("config/config_default.R")){source("config/config_default.R")}
+if(file.exists("config/config_local.R")){source("config/config_local.R")}
 source("helper.R")
 
 count.smileys <- function(text){
@@ -18,7 +18,7 @@ count.smileys <- function(text){
   return(ret)
 }
 
-my.instance.id <- get.instance.id()
+instance.id <- get.instance.id()
 
 run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
                 output.table.name, instance.id, aws.account){
@@ -62,6 +62,6 @@ run <- function(queue, path.to.ec2.shell.scripts, log.table.name,
   }
 }
 
-run(queue=my.queue, path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts,
-    log.table.name=my.log.table.name, output.table.name=my.output.table.name,
-    instance.id=my.instance.id, aws.account=my.aws.account)
+run(queue=queue, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,
+    log.table.name=log.table.name, output.table.name=output.table.name,
+    instance.id=instance.id, aws.account=aws.account)
