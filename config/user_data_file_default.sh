@@ -47,11 +47,11 @@ chmod u+x EC2-clusteR/AWS_scripts/write_output_to_dynamo.py
 # copy the config parameters that the worker.R script will need to the 
 # remote machine so you don't have to scp it over there.
 cd /src/EC2-clusteR/config
-echo 'my.queue <- "queue_name"' >> config_local.R
-echo 'my.log.table.name <- "table name here"' >> config_local.R
-echo 'my.output.table.name <- "table name here"' >> config_local.R
-echo 'my.aws.account <- "aws account number here"' >> config_local.R
-echo 'my.path.to.ec2.shell.scripts <- "AWS_scripts"' >> config_local.R
+echo 'queue <- "queue_name"' >> config_local.R
+echo 'log.table.name <- "table name here"' >> config_local.R
+echo 'output.table.name <- "table name here"' >> config_local.R
+echo 'aws.account <- "aws account number here"' >> config_local.R
+echo 'path.to.ec2.shell.scripts <- "AWS_scripts"' >> config_local.R
 chmod 600 /src/EC2-clusteR/config/config_local.R
 
 # start the worker node script
