@@ -42,7 +42,7 @@ request.spot.instance <- function(ami.id, ec2.instance.type, aws.availability.zo
     ret.val <- paste("error:  ", response)
   }
   return(ret.val)
-} # spot.instance.request.id <- request.spot.instance(ami.id=my.ami.id, ec2.instance.type=my.ec2.instance.type, aws.availability.zone=my.aws.availability.zone, path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts, key=my.ec2.key, group=my.ec2.security.group, price.df=my.price)
+} # spot.instance.request.id <- request.spot.instance(ami.id=ami.id, ec2.instance.type=ec2.instance.type, aws.availability.zone=aws.availability.zone, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, key=ec2.key, group=ec2.security.group, price.df=price)
 
 cancel.spot.instance.request <- function(path.to.ec2.shell.scripts, spot.instance.request.id){
   run.string <- paste0("./", path.to.ec2.shell.scripts,
@@ -56,7 +56,24 @@ cancel.spot.instance.request <- function(path.to.ec2.shell.scripts, spot.instanc
     ret.val <- "success"
   }
   return(ret.val)
-} # cancel.spot.instance.request(path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts, spot.instance.request.id=spot.instance.request.id)
+} # cancel.spot.instance.request(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, spot.instance.request.id=spot.instance.request.id)
+
+describe.spot.instance.request <- function(path.to.ec2.shell.scripts, spot.instance.request.id){
+  run.string <- paste0("./", path.to.ec2.shell.scripts,
+                       "/aws describe-spot-instance-requests --xml ",
+                       spot.instance.request.id)
+  response <- system(run.string, intern=T)
+  response <- paste(response, collapse="")
+  if(grepl("<Errors>", response)){
+    ret.val <- paste("error:  ", response)
+  }else{
+    status.code <- substring(response,
+       regexpr("<code>", response)+6,
+       regexpr("</code", response)-1)
+    ret.val <- status.code  # price-too-low, pending-evaluation, capacity-oversubscribed
+  }
+  return(ret.val)
+} # describe.spot.instance.request(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, spot.instance.request.id=spot.instance.request.id)
 
 #instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
@@ -109,7 +126,7 @@ delete.message.from.queue <- function(receipt.handle, path.to.ec2.shell.scripts,
                              " --simple --handle ",receipt.handle), intern=T)
   ret.val <- ifelse(sum(grepl("ReceiptHandleIsInvalid", response)) > 0, "ReceiptHandleIsInvalid", "success")
   return(ret.val)
-} # delete.message.from.queue(receipt.handle, path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts, aws.account=my.aws.account, queue=my.queue)
+} # delete.message.from.queue(receipt.handle, path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, aws.account=aws.account, queue=queue)
 
 get.queue.length <- function(path.to.ec2.shell.scripts,
                              aws.account=aws.account, queue=queue){
@@ -158,4 +175,4 @@ write.output.to.dynamo <- function(path.to.ec2.shell.scripts, table.name, instan
                            message.body, "\' \'", output, "\' \'", instance.id,
                            "\' \'", time.pretty, "\' ", time.int), intern=T)
   return(ret.val)
-} # write.output.to.dynamo(path.to.ec2.shell.scripts=my.path.to.ec2.shell.scripts,table.name="cory_output_test", instance.id="instanceid2", message.body="{sample tweet here :)}", output="1")
+} # write.output.to.dynamo(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts,table.name="cory_output_test", instance.id="instanceid2", message.body="{sample tweet here :)}", output="1")
