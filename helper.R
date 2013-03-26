@@ -67,13 +67,20 @@ describe.spot.instance.request <- function(path.to.ec2.shell.scripts, spot.insta
   if(grepl("<Errors>", response)){
     ret.val <- paste("error:  ", response)
   }else{
+    # price-too-low, pending-evaluation, capacity-oversubscribed, fulfilled
     status.code <- substring(response,
        regexpr("<code>", response)+6,
        regexpr("</code", response)-1)
-    ret.val <- status.code  # price-too-low, pending-evaluation, capacity-oversubscribed
+    if(status.code=="fulfilled"){
+      ret.val <- substring(response,
+                           regexpr("<instanceId>", response)+12,
+                           regexpr("</instanceId", response)-1)
+    }else{
+      ret.val <- status.code  # price-too-low, pending-evaluation, capacity-oversubscribed, fulfilled
+    }
   }
   return(ret.val)
-} # describe.spot.instance.request(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, spot.instance.request.id=spot.instance.request.id)
+} # instance.id <- describe.spot.instance.request(path.to.ec2.shell.scripts=path.to.ec2.shell.scripts, spot.instance.request.id=spot.instance.request.id)
 
 #instance.id <- "i-e487bc9"
 stop.ec2.machine <- function(instance.id, path.to.ec2.shell.scripts){
